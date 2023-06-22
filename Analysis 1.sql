@@ -151,10 +151,59 @@ FROM [KCC].[dbo].[Orders] O
 JOIN [KCC].[dbo].[Customers] C ON O.CustomerID = C.CustomerID
 GROUP BY DATEPART(MONTH, O.OrderDate);
 
-
 SELECT TOP 1 DATEPART(MONTH, O.OrderDate) AS OrderMonth, SUM(O.OrderTotal) AS TotalOrderAmount
 FROM [KCC].[dbo].[Orders] O
 JOIN [KCC].[dbo].[Customers] C ON O.CustomerID = C.CustomerID
 GROUP BY DATEPART(MONTH, O.OrderDate)
 ORDER BY TotalOrderAmount ASC;
 ---month with the least order total 
+
+SELECT
+    YEAR(O.OrderDate) AS OrderYear,
+    COUNT(DISTINCT O.CustomerID) AS NumCustomers,
+    LAG(COUNT(DISTINCT O.CustomerID)) OVER (ORDER BY YEAR(O.OrderDate)) AS PreviousYearCustomers,
+    COUNT(DISTINCT O.CustomerID) / LAG(COUNT(DISTINCT O.CustomerID)) OVER (ORDER BY YEAR(O.OrderDate)) * 100 AS RetentionRate
+FROM
+    [KCC].[dbo].[Orders] O
+    JOIN [KCC].[dbo].[Customers] C ON O.CustomerID = C.CustomerID
+GROUP BY
+    YEAR(O.OrderDate);
+	---Customer retention rate:
+
+
+	SELECT TOP 3
+    C.Country,
+    AVG(O.OrderTotal) AS AverageOrderTotal
+FROM
+    [KCC].[dbo].[Orders] O
+    JOIN [KCC].[dbo].[Customers] C ON O.CustomerID = C.CustomerID
+GROUP BY
+    C.Country
+HAVING
+    AVG(O.OrderTotal) > 0
+ORDER BY
+    AverageOrderTotal DESC;
+	---Top 3 countries with the highest average order total per customer:
+
+
+	SELECT COUNT(*) AS NumCustomersWithNotes
+FROM [KCC].[dbo].[Customers]
+WHERE Notes IS NOT NULL;
+---This query counts the number of customers where the Notes column is not null, indicating the presence of notes.
+
+
+SELECT TOP 5 O.OrderID, O.OrderDate, O.CustomerID, O.OrderTotal, C.CustomerName, C.Notes
+FROM [KCC].[dbo].[Orders] O
+JOIN [KCC].[dbo].[Customers] C ON O.CustomerID = C.CustomerID
+WHERE C.Notes IS NOT NULL
+ORDER BY LEN(C.Notes) DESC;
+---The query you provided retrieves the top 5 orders with the longest notes from the merged [KCC].[dbo].[Orders] and [KCC].[dbo].[Customers] tables.
+
+
+
+
+
+
+
+
+
