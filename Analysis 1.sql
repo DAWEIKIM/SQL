@@ -201,6 +201,44 @@ ORDER BY LEN(C.Notes) DESC;
 
 
 
+SELECT O.OrderID, O.OrderDate, O.CustomerID
+FROM [KCC].[dbo].[Orders] O
+WHERE EXISTS (
+    SELECT 1
+    FROM [KCC].[dbo].[Customers] C
+    WHERE O.CustomerID = C.CustomerID
+    AND C.City = 'Oslo'
+);
+---The query I provided checks if there are any orders in the [KCC].[dbo].[Orders] table where the corresponding customer has the city 'Oslo' in the [KCC].[dbo].[Customers] table.
+
+SELECT C.CustomerID, C.CustomerName, COUNT(O.OrderID) AS NumOrders
+FROM [KCC].[dbo].[Orders] O
+JOIN [KCC].[dbo].[Customers] C ON O.CustomerID = C.CustomerID
+WHERE C.City = 'Oslo'
+GROUP BY C.CustomerID, C.CustomerName;
+---This displays the count of orders for each customer from the city of Oslo
+
+SELECT C.CustomerID, C.CustomerName, COUNT(O.OrderID) AS NumOrders
+FROM [KCC].[dbo].[Orders] O
+JOIN [KCC].[dbo].[Customers] C ON O.CustomerID = C.CustomerID
+GROUP BY C.CustomerID, C.CustomerName
+HAVING COUNT(O.OrderID) > 10;
+---The query retrieves the customer details along with the count of orders for each customer who has more than 10 orders
+
+
+SELECT O.OrderID, O.OrderDate, O.CustomerID, O.OrderTotal, C.CustomerName,
+       CASE
+           WHEN O.OrderTotal > 1000 THEN 'High Value'
+           WHEN O.OrderTotal > 500 THEN 'Medium Value'
+           ELSE 'Low Value'
+       END AS OrderCategory
+FROM [KCC].[dbo].[Orders] O
+JOIN [KCC].[dbo].[Customers] C ON O.CustomerID = C.CustomerID;
+---In, the query selects the OrderID, OrderDate, CustomerID, OrderTotal, and CustomerName from the combined [KCC].[dbo].[Orders] 
+---and [KCC].[dbo].[Customers] tables. The CASE clause is then used 
+---to categorize the orders based on their OrderTotal into 'High Value', 'Medium Value', or 'Low Value' based on the specified conditions.
+
+
 
 
 
